@@ -45,7 +45,8 @@ app.get('/healthcheck', (_req, res) => {
   });
 });
 
-app.use('/api', routes);
+// app.use('/api', routes);
+app.use('', routes);
 app.all('*', handle404Error);
 app.use(errorHandler);
 
