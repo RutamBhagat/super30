@@ -18,8 +18,8 @@ afterEach(() => {
   nock.cleanAll(); // Clean up any mocks after each test
 });
 
-describe('aPI Endpoints', () => {
-  it('gET / should return welcome message', async () => {
+describe('api endpoints', () => {
+  it('get / should return welcome message', async () => {
     const response = await request(app).get('/');
 
     expect(response.status).toBe(200);
@@ -28,7 +28,7 @@ describe('aPI Endpoints', () => {
     });
   });
 
-  it('gET /healthcheck should return server health information', async () => {
+  it('get /healthcheck should return server health information', async () => {
     const response = await request(app).get('/healthcheck');
 
     expect(response.status).toBe(200);
