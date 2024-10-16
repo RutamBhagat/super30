@@ -14,7 +14,7 @@ import consola from 'consola';
 
 const MAX_USERS = 10;
 const MAX_TRADES = 20;
-const MAX_SYMBOLS = 5;
+const MAX_SYMBOLS = 10;
 const MAX_ORDERS = 15;
 const MAX_ONRAMPS = 10;
 
@@ -32,13 +32,13 @@ function generateTrade(userId: string, stockSymbol: string): NewTrade {
     userId,
     stockSymbol,
     quantity: faker.number.int({ min: 1, max: 100 }),
-    price: faker.number.int({ min: 100, max: 1000 }),
+    price: faker.number.int({ min: 10000, max: 100000 }),
   };
 }
 
 function generateSymbol(): NewSymbol {
   return {
-    name: faker.finance.currencyName(), // Generates a random currency name
+    name: faker.finance.currencyName(),
   };
 }
 
@@ -47,7 +47,7 @@ function generateOrder(userId: string, stockSymbol: string): NewOrder {
     userId,
     stockSymbol,
     quantity: faker.number.int({ min: 1, max: 100 }),
-    price: faker.number.int({ min: 100, max: 1000 }),
+    price: faker.number.int({ min: 10000, max: 100000 }),
     stockType: faker.finance.accountName(),
   };
 }
@@ -55,16 +55,15 @@ function generateOrder(userId: string, stockSymbol: string): NewOrder {
 function generateOnramp(userId: string): NewOnramp {
   return {
     userId,
-    amount: faker.number.int({ min: 100, max: 1000 }),
+    amount: faker.number.int({ min: 10000, max: 100000 }),
   };
 }
 
 async function seedDatabase() {
   consola.info('Starting database seeding...');
 
-  // Seed symbols first
   const symbols: NewSymbol[] = [];
-  const numSymbols = faker.number.int({ min: 1, max: MAX_SYMBOLS });
+  const numSymbols = faker.number.int({ min: 5, max: MAX_SYMBOLS });
 
   for (let i = 0; i < numSymbols; i++) {
     const symbolData = generateSymbol();
@@ -79,7 +78,6 @@ async function seedDatabase() {
     }
   }
 
-  // Seed users
   const users = [];
 
   const numUsers = faker.number.int({ min: 1, max: MAX_USERS });
@@ -93,7 +91,6 @@ async function seedDatabase() {
       const { user } = await addUser(userData);
       users.push(user);
 
-      // Seed onramps for the user
       const numOnramps = faker.number.int({ min: 1, max: MAX_ONRAMPS });
 
       for (let j = 0; j < numOnramps; j++) {
@@ -108,13 +105,12 @@ async function seedDatabase() {
         }
       }
 
-      // Seed trades for the user
       const numTrades = faker.number.int({ min: 1, max: MAX_TRADES });
 
       for (let j = 0; j < numTrades; j++) {
         const symbol = symbols[Math.floor(Math.random() * symbols.length)];
 
-        if (symbol) { // Check if symbol is defined
+        if (symbol) {
           const tradeData = generateTrade(user.id, symbol.name);
           consola.info(`Creating trade for user: ${user.email}`);
 
@@ -127,13 +123,12 @@ async function seedDatabase() {
         }
       }
 
-      // Seed orders for the user
       const numOrders = faker.number.int({ min: 1, max: MAX_ORDERS });
 
       for (let j = 0; j < numOrders; j++) {
         const symbol = symbols[Math.floor(Math.random() * symbols.length)];
 
-        if (symbol) { // Check if symbol is defined
+        if (symbol) {
           const orderData = generateOrder(user.id, symbol.name);
           consola.info(`Creating order for user: ${user.email}`);
 

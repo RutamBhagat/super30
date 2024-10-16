@@ -14,7 +14,8 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "bun run src/seed/seed.ts",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest"
   },
   "dependencies": {
     "@antfu/eslint-config": "^3.7.3",
@@ -23,6 +24,8 @@
     "@neondatabase/serverless": "^0.10.1",
     "@react-email/components": "^0.0.14",
     "@react-email/render": "^0.0.12",
+    "@types/jest": "^29.5.13",
+    "@types/supertest": "^6.0.2",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",
     "argon2": "^0.31.2",
