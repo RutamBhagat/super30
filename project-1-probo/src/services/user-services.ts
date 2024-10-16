@@ -2,11 +2,15 @@ import crypto from 'node:crypto';
 import process from 'node:process';
 import { type NewUser, type UpdateUser, type User, users } from '@/schema/user';
 import { db } from '@/utils/db';
-import argon2 from 'argon2';
-import { eq } from 'drizzle-orm';
-// import { sendVerificationEmail } from '@/utils/email';
 import { BackendError } from '@/utils/errors';
 import { sha256 } from '@/utils/hash';
+import argon2 from 'argon2';
+import { eq } from 'drizzle-orm';
+
+export async function getUserByUsername(username: string) {
+  const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  return user;
+}
 
 export async function getUserByEmail(email: string) {
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
@@ -32,6 +36,7 @@ export async function addUser(user: NewUser) {
     })
     .returning({
       id: users.id,
+      username: users.username,
       email: users.email,
       isAdmin: users.isAdmin,
       isVerified: users.isVerified,
@@ -48,15 +53,15 @@ export async function addUser(user: NewUser) {
   return { user: newUser, code };
 }
 
-export async function deleteUser(email: string) {
-  const user = await getUserByEmail(email);
+export async function deleteUser(username: string) {
+  const user = await getUserByUsername(username);
 
   if (!user)
     throw new BackendError('USER_NOT_FOUND');
 
-  const [deletedUser] = await db.delete(users).where(eq(users.email, email)).returning({
+  const [deletedUser] = await db.delete(users).where(eq(users.username, username)).returning({
     id: users.id,
-    email: users.email,
+    username: users.username,
   });
 
   return deletedUser;
@@ -67,17 +72,17 @@ export async function getUserByUserId(userId: string) {
   return user;
 }
 
-export async function updateUser(user: User, { email, password }: UpdateUser) {
+export async function updateUser(user: User, { username, password }: UpdateUser) {
   let code: string | undefined;
   let hashedCode: string | undefined;
 
-  if (email) {
-    const user = await getUserByEmail(email);
+  if (username) {
+    const user = await getUserByUsername(username);
 
     if (user) {
       throw new BackendError('CONFLICT', {
-        message: 'Email already in use',
-        details: { email },
+        message: 'Username already in use',
+        details: { username },
       });
     }
 
@@ -88,14 +93,15 @@ export async function updateUser(user: User, { email, password }: UpdateUser) {
   const [updatedUser] = await db
     .update(users)
     .set({
-      email,
+      username,
       password,
       code: hashedCode,
       isVerified: hashedCode ? false : user.isVerified,
     })
-    .where(eq(users.email, user.email))
+    .where(eq(users.username, user.username))
     .returning({
       id: users.id,
+      username: users.username,
       email: users.email,
       isAdmin: users.isAdmin,
       isVerified: users.isVerified,
@@ -108,60 +114,5 @@ export async function updateUser(user: User, { email, password }: UpdateUser) {
       message: 'User could not be updated',
     });
   }
-
-  // if (email && code) {
-  //   const { API_BASE_URL } = process.env;
-  //   const status = await sendVerificationEmail(
-  //     API_BASE_URL,
-  //     updatedUser.name,
-  //     updatedUser.email,
-  //     code,
-  //   );
-
-  //   if (status !== 200) {
-  //     await db
-  //       .update(users)
-  //       .set({ email: user.email, isVerified: user.isVerified })
-  //       .where(eq(users.email, updatedUser.email))
-  //       .returning();
-  //     throw new BackendError('BAD_REQUEST', {
-  //       message: 'Email could not be updated',
-  //     });
-  //   }
-  // }
-
   return updatedUser;
 }
-
-// export async function verifyUser(email: string, code: string) {
-//   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-
-//   if (!user)
-//     throw new BackendError('USER_NOT_FOUND');
-
-//   if (user.isVerified) {
-//     throw new BackendError('CONFLICT', {
-//       message: 'User already verified',
-//     });
-//   }
-
-//   const isVerified = sha256.verify(code, user.code);
-
-//   if (!isVerified) {
-//     throw new BackendError('UNAUTHORIZED', {
-//       message: 'Invalid verification code',
-//     });
-//   }
-
-//   const [updatedUser] = await db
-//     .update(users)
-//     .set({ isVerified })
-//     .where(eq(users.email, email))
-//     .returning({ id: users.id });
-
-//   if (!updatedUser) {
-//     throw new BackendError('INTERNAL_ERROR', {
-//       message: 'Failed to verify user',
-//     });
-//   }
-// }

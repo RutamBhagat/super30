@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { deleteUserSchema, loginSchema, newUserSchema, updateUserSchema, type User, verifyUserSchema } from '@/schema/user';
-import { addUser, deleteUser, getUserByEmail, updateUser } from '@/services/user-services';
+import { addUser, deleteUser, getUserByUsername, updateUser } from '@/services/user-services';
 import { createHandler } from '@/utils/create';
 import { BackendError } from '@/utils/errors';
 import generateToken from '@/utils/jwt';
@@ -8,8 +8,8 @@ import argon2 from 'argon2';
 import consola from 'consola';
 
 export const handleUserLogin = createHandler(loginSchema, async (req, res) => {
-  const { email, password } = req.body;
-  const user = await getUserByEmail(email);
+  const { username, password } = req.body;
+  const user = await getUserByUsername(username);
 
   if (!user)
     throw new BackendError('USER_NOT_FOUND');
@@ -26,8 +26,7 @@ export const handleUserLogin = createHandler(loginSchema, async (req, res) => {
 
 export const handleAddUser = createHandler(newUserSchema, async (req, res) => {
   const user = req.body;
-  consola.log('Received body:', req.body);
-  const existingUser = await getUserByEmail(user.email);
+  const existingUser = await getUserByUsername(user.username);
 
   if (existingUser) {
     throw new BackendError('CONFLICT', {
@@ -37,26 +36,12 @@ export const handleAddUser = createHandler(newUserSchema, async (req, res) => {
 
   const { user: addedUser } = await addUser(user);
 
-  // Uncomment and implement email verification if needed
-  // const status = await sendVerificationEmail(
-  //   process.env.API_BASE_URL,
-  //   addedUser.email,
-  //   code,
-  // );
-
-  // if (status !== 200) {
-  //   await deleteUser(addedUser.email);
-  //   throw new BackendError('INTERNAL_ERROR', {
-  //     message: 'Failed to signup user',
-  //   });
-  // }
-
-  res.status(201).json(addedUser);
+  res.status(201).json({ user: addedUser, message: `User ${user.username} created` });
 });
 
 export const handleUserLoginWithoutVerification = createHandler(loginSchema, async (req, res) => {
-  const { email } = req.body;
-  const user = await getUserByEmail(email);
+  const { username } = req.body;
+  const user = await getUserByUsername(username);
 
   if (!user)
     throw new BackendError('USER_NOT_FOUND');
@@ -71,6 +56,7 @@ export const handleGetUser = createHandler(async (_req, res) => {
   res.status(200).json({
     user: {
       id: user.id,
+      username: user.username,
       email: user.email,
       isAdmin: user.isAdmin,
       isVerified: user.isVerified,
@@ -83,9 +69,9 @@ export const handleGetUser = createHandler(async (_req, res) => {
 export const handleUpdateUser = createHandler(updateUserSchema, async (req, res) => {
   const { user } = res.locals as { user: User };
 
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  const updatedUser = await updateUser(user, { email, password });
+  const updatedUser = await updateUser(user, { username, password });
 
   res.status(200).json({
     user: updatedUser,
@@ -93,48 +79,19 @@ export const handleUpdateUser = createHandler(updateUserSchema, async (req, res)
 });
 
 export const handleDeleteUser = createHandler(deleteUserSchema, async (req, res) => {
-  const { email } = req.body;
+  const { username } = req.body;
 
   const { user } = res.locals as { user: User };
 
-  // consola.log('Received Email:', email);
-  // consola.log('Token User Email:', user.email);
-
-  if (user.email !== email) {
+  if (user.username !== username) {
     throw new BackendError('UNAUTHORIZED', {
       message: 'You are not authorized to delete this user',
     });
   }
 
-  const deletedUser = await deleteUser(email);
+  const deletedUser = await deleteUser(username);
 
   res.status(204).json({
     user: deletedUser,
   });
 });
-
-// export const handleVerifyUser = createHandler(verifyUserSchema, async (req, res) => {
-//   try {
-//     const { email, code } = req.query;
-
-//     await verifyUser(email, code);
-//     const template = render(
-//       UserVerified({ status: 'verified', message: 'User verified successfully' }),
-//     );
-//     res.status(200).send(template);
-//   }
-//   catch (err) {
-//     if (err instanceof BackendError) {
-//       const template = render(
-//         UserVerified({
-//           status: 'invalid',
-//           message: err.message,
-//           error: 'Invalid Request',
-//         }),
-//       );
-//       res.status(getStatusFromErrorCode(err.code)).send(template);
-//       return;
-//     }
-//     throw err;
-//   }
-// });

@@ -10,11 +10,10 @@ export const Gender = pgEnum('gender', ['MALE', 'FEMALE']);
 
 export const users = pgTable('users', {
   id: uuid('id').notNull().primaryKey().defaultRandom(),
-  firstName: varchar('first_name', { length: 255 }),
-  lastName: varchar('last_name', { length: 255 }),
-  email: text('email').notNull().unique(),
-  isAdmin: boolean('is_admin').notNull().default(false),
-  password: text('password').notNull(),
+  username: varchar('username', { length: 255 }).unique().notNull(),
+  email: text('email').unique(),
+  isAdmin: boolean('is_admin').default(false),
+  password: text('password').notNull().default('123456'), // The schema is currently temporary for testing purposes
   isVerified: boolean('is_verified').notNull().default(true),
   salt: text('salt').notNull(),
   code: text('code').notNull(),
@@ -42,20 +41,20 @@ export const verifyUserSchema = z.object({
 
 export const deleteUserSchema = z.object({
   body: selectUserSchema.pick({
-    email: true,
+    username: true,
   }),
 });
 
 export const loginSchema = z.object({
   body: selectUserSchema.pick({
-    email: true,
+    username: true,
     password: true,
   }),
 });
 
 export const addUserSchema = z.object({
   body: selectUserSchema.pick({
-    email: true,
+    username: true,
     password: true,
     salt: true,
     code: true,
@@ -64,8 +63,7 @@ export const addUserSchema = z.object({
 
 export const updateUserSchema = z.object({
   body: selectUserSchema.pick({
-    firstName: true,
-    lastName: true,
+    username: true,
     email: true,
     password: true,
   }).partial(),
@@ -73,7 +71,7 @@ export const updateUserSchema = z.object({
 
 export const newUserSchema = z.object({
   body: selectUserSchema.pick({
-    email: true,
+    username: true,
     password: true,
   }),
 });
