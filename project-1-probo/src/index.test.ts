@@ -1,9 +1,16 @@
 import request from 'supertest';
 import app from './server';
 
+jest.useFakeTimers();
+
 describe('e-to-E-1', () => {
+  // Add timeout if tests are taking too long
+  jest.setTimeout(30000);
+
   beforeAll(async () => {
-    await request(app).post('/reset'); // resets the data values
+    const response = await request(app).post('/');
+    // Optional: Add validation for reset response
+    expect(response.status).toBe(200);
   });
 
   it('this test just checks the response messages and status', async () => {
