@@ -5,7 +5,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 beforeAll(async () => {
   // Reset the data values
-  // await supertest(app).post('/api/reset');
+  await supertest(app).post('/api/reset');
 });
 
 afterEach(() => {
@@ -199,7 +199,7 @@ describe('e-to-E-4', () => {
 
   it('should handle multiple buy orders with price priority matching when a third user introduces a matching sell price', async () => {
     // Reset data and start fresh
-    // await supertest(app).post('/api/reset');
+    await supertest(app).post('/api/reset');
 
     // Step 1: Create users (User1, User2, and User3)
     await supertest(app)

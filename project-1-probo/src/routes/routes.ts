@@ -6,6 +6,7 @@ import symbolRoutes from '@/routes/symbol-routes';
 import tradeRoutes from '@/routes/trade-routes';
 import userRoutes from '@/routes/user-routes';
 import { createRouter } from '@/utils/create';
+import resetRoutes from './reset-routes';
 
 export default createRouter((router: Router) => {
   router.use('/admin', adminRoutes);
@@ -14,4 +15,5 @@ export default createRouter((router: Router) => {
   router.use('/onramp', onrampRoutes);
   router.use('/trade', tradeRoutes);
   router.use('/order', orderRoutes);
+  router.use('/reset', resetRoutes);
 });

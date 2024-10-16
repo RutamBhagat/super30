@@ -5,7 +5,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 beforeAll(async () => {
   // Reset the data values
-  // await supertest(app).post('/api/reset');
+  await supertest(app).post('/api/reset');
 });
 
 afterEach(() => {
