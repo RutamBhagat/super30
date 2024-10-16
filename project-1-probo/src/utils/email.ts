@@ -19,12 +19,12 @@
 //   return client;
 // }
 
-// export async function sendVerificationEmail(baseUrl: string, firstName: string, lastName: string, email: string, code: string) {
+// export async function sendVerificationEmail(baseUrl: string, email: string, code: string) {
 //   try {
 //     const client = getEmailClient();
 //     const { FROM_NAME, FROM_EMAIL } = process.env;
 
-//     const emailHtml = render(VerificationEmail({ baseUrl, firstName, lastName, email, code }));
+//     const emailHtml = render(VerificationEmail({ baseUrl, email, code }));
 
 //     const params = {
 //       Source: `${FROM_NAME} <${FROM_EMAIL}>`,

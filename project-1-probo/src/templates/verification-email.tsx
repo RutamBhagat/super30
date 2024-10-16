@@ -15,16 +15,12 @@
 
 // interface VerificationEmailProps {
 //   baseUrl: string;
-//   firstName: string;
-//   lastName: string;
 //   email: string;
 //   code: string;
 // }
 
 // export function VerificationEmail({
 //   baseUrl,
-//   firstName,
-//   lastName,
 //   email,
 //   code,
 // }: VerificationEmailProps) {
@@ -50,7 +46,7 @@
 //             <Section>
 //               <Heading>Verify your email!</Heading>
 //               <Text className="text-lg">
-//                 Hello {firstName} {lastName}!,
+//                 Hello {email}!,
 //               </Text>
 //               <Text className="text-lg">
 //                 Thank you for signing up! Please click the button below to verify your

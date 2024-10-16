@@ -10,8 +10,8 @@ export const Gender = pgEnum('gender', ['MALE', 'FEMALE']);
 
 export const users = pgTable('users', {
   id: uuid('id').notNull().primaryKey().defaultRandom(),
-  firstName: varchar('first_name', { length: 255 }).notNull(),
-  lastName: varchar('last_name', { length: 255 }).notNull(),
+  firstName: varchar('first_name', { length: 255 }),
+  lastName: varchar('last_name', { length: 255 }),
   email: text('email').notNull().unique(),
   isAdmin: boolean('is_admin').notNull().default(false),
   password: text('password').notNull(),
@@ -55,8 +55,6 @@ export const loginSchema = z.object({
 
 export const addUserSchema = z.object({
   body: selectUserSchema.pick({
-    firstName: true,
-    lastName: true,
     email: true,
     password: true,
     salt: true,
@@ -75,8 +73,6 @@ export const updateUserSchema = z.object({
 
 export const newUserSchema = z.object({
   body: selectUserSchema.pick({
-    firstName: true,
-    lastName: true,
     email: true,
     password: true,
   }),

@@ -40,8 +40,6 @@ export const handleAddUser = createHandler(newUserSchema, async (req, res) => {
   // Uncomment and implement email verification if needed
   // const status = await sendVerificationEmail(
   //   process.env.API_BASE_URL,
-  //   addedUser.firstName,
-  //   addedUser.lastName,
   //   addedUser.email,
   //   code,
   // );
@@ -73,8 +71,6 @@ export const handleGetUser = createHandler(async (_req, res) => {
   res.status(200).json({
     user: {
       id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
       email: user.email,
       isAdmin: user.isAdmin,
       isVerified: user.isVerified,
@@ -87,9 +83,9 @@ export const handleGetUser = createHandler(async (_req, res) => {
 export const handleUpdateUser = createHandler(updateUserSchema, async (req, res) => {
   const { user } = res.locals as { user: User };
 
-  const { firstName, lastName, email, password } = req.body;
+  const { email, password } = req.body;
 
-  const updatedUser = await updateUser(user, { firstName, lastName, email, password });
+  const updatedUser = await updateUser(user, { email, password });
 
   res.status(200).json({
     user: updatedUser,

@@ -20,8 +20,6 @@ const MAX_ONRAMPS = 10;
 
 function generateUser(): NewUser {
   return {
-    firstName: faker.person.firstName(),
-    lastName: faker.person.lastName(),
     email: faker.internet.email(),
     password: faker.internet.password(),
   };

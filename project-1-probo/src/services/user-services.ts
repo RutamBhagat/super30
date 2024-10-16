@@ -32,8 +32,6 @@ export async function addUser(user: NewUser) {
     })
     .returning({
       id: users.id,
-      firstName: users.firstName,
-      lastName: users.lastName,
       email: users.email,
       isAdmin: users.isAdmin,
       isVerified: users.isVerified,
@@ -58,7 +56,6 @@ export async function deleteUser(email: string) {
 
   const [deletedUser] = await db.delete(users).where(eq(users.email, email)).returning({
     id: users.id,
-    name: users.firstName,
     email: users.email,
   });
 
@@ -70,7 +67,7 @@ export async function getUserByUserId(userId: string) {
   return user;
 }
 
-export async function updateUser(user: User, { firstName, lastName, email, password }: UpdateUser) {
+export async function updateUser(user: User, { email, password }: UpdateUser) {
   let code: string | undefined;
   let hashedCode: string | undefined;
 
@@ -91,8 +88,6 @@ export async function updateUser(user: User, { firstName, lastName, email, passw
   const [updatedUser] = await db
     .update(users)
     .set({
-      firstName,
-      lastName,
       email,
       password,
       code: hashedCode,
@@ -101,8 +96,6 @@ export async function updateUser(user: User, { firstName, lastName, email, passw
     .where(eq(users.email, user.email))
     .returning({
       id: users.id,
-      firstName: users.firstName,
-      lastName: users.lastName,
       email: users.email,
       isAdmin: users.isAdmin,
       isVerified: users.isVerified,

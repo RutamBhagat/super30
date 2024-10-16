@@ -6,8 +6,6 @@ export async function getAllUsers() {
   return await db
     .select({
       id: users.id,
-      firstName: users.firstName,
-      lastName: users.lastName,
       email: users.email,
       isAdmin: users.isAdmin,
       isVerified: users.isVerified,
@@ -21,8 +19,6 @@ export async function getAUser(id: string) {
   const [user] = await db
     .select({
       id: users.id,
-      firstName: users.firstName,
-      lastName: users.lastName,
       email: users.email,
       isAdmin: users.isAdmin,
       isVerified: users.isVerified,
