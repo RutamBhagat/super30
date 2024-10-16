@@ -14,8 +14,8 @@ afterEach(() => {
 
 describe('e-to-E-1', () => {
   it('should check the response messages and status', async () => {
-    // Step 1: Create a new user (User5)
-    const response = await supertest(app)
+    // Step 1: Create a new user "user5"
+    let response = await supertest(app)
       .post('/api/user/create')
       .send({
         username: 'user5',
@@ -24,15 +24,16 @@ describe('e-to-E-1', () => {
       .expect(201);
     expect(response.body.message).toBe('User user5 created');
 
-    // // Step 2: Add balance to user5
-    // response = await supertest(app)
-    //   .post('/api/onramp/inr')
-    //   .send({
-    //     userId: 'user5',
-    //     amount: 50000,
-    //   })
-    //   .expect(200);
-    // expect(response.body.message).toBe('Onramped user5 with amount 50000');
+    // Step 2: Add balance to user5
+    const userId = response.body.user.id;
+    response = await supertest(app)
+      .post('/api/onramp/inr')
+      .send({
+        userId,
+        amount: 50000,
+      })
+      .expect(200);
+    expect(response.body.message).toBe(`Onramped ${userId} with amount 50000`);
 
     // // Step 3: Create a new symbol
     // response = await supertest(app)
