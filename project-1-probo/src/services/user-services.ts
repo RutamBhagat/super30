@@ -35,8 +35,6 @@ export async function addUser(user: NewUser) {
       firstName: users.firstName,
       lastName: users.lastName,
       email: users.email,
-      gender: users.gender,
-      jobTitle: users.jobTitle,
       isAdmin: users.isAdmin,
       isVerified: users.isVerified,
       createdAt: users.createdAt,
@@ -72,7 +70,7 @@ export async function getUserByUserId(userId: string) {
   return user;
 }
 
-export async function updateUser(user: User, { firstName, lastName, email, gender, jobTitle, password }: UpdateUser) {
+export async function updateUser(user: User, { firstName, lastName, email, password }: UpdateUser) {
   let code: string | undefined;
   let hashedCode: string | undefined;
 
@@ -96,8 +94,6 @@ export async function updateUser(user: User, { firstName, lastName, email, gende
       firstName,
       lastName,
       email,
-      gender,
-      jobTitle,
       password,
       code: hashedCode,
       isVerified: hashedCode ? false : user.isVerified,
@@ -108,8 +104,6 @@ export async function updateUser(user: User, { firstName, lastName, email, gende
       firstName: users.firstName,
       lastName: users.lastName,
       email: users.email,
-      gender: users.gender,
-      jobTitle: users.jobTitle,
       isAdmin: users.isAdmin,
       isVerified: users.isVerified,
       createdAt: users.createdAt,
