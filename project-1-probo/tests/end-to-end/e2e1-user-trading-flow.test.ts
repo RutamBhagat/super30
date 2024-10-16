@@ -1,7 +1,7 @@
 import app from '@/server';
 import nock from 'nock';
 import supertest from 'supertest';
-import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'; // Importing consola
 
 beforeAll(async () => {
   // Reset the data values
@@ -16,7 +16,7 @@ describe('e-to-E-1', () => {
   it('should check the response messages and status', async () => {
     // Step 1: Create a new user "user5"
     let response = await supertest(app)
-      .post('/api/user/create') 
+      .post('/api/user/create')
       .send({
         username: 'user5',
         password: '123456',
@@ -41,25 +41,28 @@ describe('e-to-E-1', () => {
       .expect(201);
     expect(response.body.message).toBe('Symbol AAPL_USD_25_Oct_2024_14_00 created');
 
-    // // Step 4: Mint tokens for User5
-    // response = await supertest(app)
-    //   .post('/api/trade/mint')
-    //   .send({
-    //     userId: 'user5',
-    //     stockSymbol: 'AAPL_USD_25_Oct_2024_14_00',
-    //     quantity: 25,
-    //     price: 1000,
-    //   })
-    //   .expect(200);
-    // expect(response.body.message).toBe(
-    //   'Minted 25 \'yes\' and \'no\' tokens for user user5, remaining balance is 0',
-    // );
+    // Step 4: Mint tokens for User5
+    response = await supertest(app)
+      .post('/api/trade/mint')
+      .send({
+        userId,
+        stockSymbol: 'AAPL_USD_25_Oct_2024_14_00',
+        quantity: 25,
+        price: 1000,
+      })
+      .expect(200);
+    expect(response.body.message).toBe(
+      `Minted 25 'yes' and 'no' tokens for user ${userId}, remaining balance is 0`,
+    );
 
-    // // Step 5: User5 sells 10 'no' tokens
+    // Uncommenting the following steps will allow you to continue testing further actions
+
+    // Step 5: User5 sells 10 'no' tokens
+
     // response = await supertest(app)
     //   .post('/api/order/sell')
     //   .send({
-    //     userId: 'user5',
+    //     userId,
     //     stockSymbol: 'AAPL_USD_25_Oct_2024_14_00',
     //     quantity: 10,
     //     price: 1000,
@@ -82,7 +85,6 @@ describe('e-to-E-1', () => {
     //     amount: 20000,
     //   })
     //   .expect(200);
-    // expect(response.body.message).toBe('Onramped user6 with amount 20000');
 
     // response = await supertest(app)
     //   .post('/api/order/buy')
@@ -94,16 +96,17 @@ describe('e-to-E-1', () => {
     //     stockType: 'no',
     //   })
     //   .expect(200);
-    // expect(response.body.message).toBe('Buy order placed and trade executed');
 
     // // Fetch balances after the trade
     // response = await supertest(app)
     //   .get('/api/balances/inr')
     //   .expect(200);
+
     // expect(response.body.user6).toEqual({
     //   balance: 10000, // 20000 - (10 * 1000)
     //   locked: 0,
     // });
+
     // expect(response.body.user5).toEqual({
     //   balance: 10000,
     //   locked: 0,
