@@ -21,7 +21,14 @@ export type HttpErrorCode =
   | 'EXPECTATION_FAILED'
   | 'TEAPOT';
 
-type BackendErrorCode = 'VALIDATION_ERROR' | 'USER_NOT_FOUND' | 'INVALID_PASSWORD';
+type BackendErrorCode =
+  | 'VALIDATION_ERROR'
+  | 'USER_NOT_FOUND'
+  | 'INVALID_PASSWORD'
+  | 'DATABASE_ERROR'
+  | 'CONNECTION_TIMEOUT'
+  | 'CONNECTION_REFUSED'
+  | 'DUPLICATE_ENTRY';
 
 type ErrorCode = HttpErrorCode | BackendErrorCode | 'INTERNAL_ERROR';
 
@@ -41,8 +48,10 @@ export function getStatusFromErrorCode(code: ErrorCode): number {
     case 'NOT_ACCEPTABLE':
       return 406;
     case 'REQUEST_TIMEOUT':
+    case 'CONNECTION_TIMEOUT':
       return 408;
     case 'CONFLICT':
+    case 'DUPLICATE_ENTRY':
       return 409;
     case 'GONE':
       return 410;
@@ -61,7 +70,10 @@ export function getStatusFromErrorCode(code: ErrorCode): number {
     case 'EXPECTATION_FAILED':
       return 417;
     case 'TEAPOT':
-      return 418; // I'm a teapot
+      return 418;
+    case 'DATABASE_ERROR':
+    case 'CONNECTION_REFUSED':
+      return 503;
     case 'INTERNAL_ERROR':
       return 500;
     default:
@@ -87,6 +99,14 @@ export function getMessageFromErrorCode(code: ErrorCode): string {
       return 'The request conflicts with the current state of the server.';
     case 'INVALID_PASSWORD':
       return 'The password is incorrect.';
+    case 'DATABASE_ERROR':
+      return 'A database error occurred.';
+    case 'CONNECTION_TIMEOUT':
+      return 'Database connection timed out.';
+    case 'CONNECTION_REFUSED':
+      return 'Unable to connect to database.';
+    case 'DUPLICATE_ENTRY':
+      return 'This record already exists.';
     default:
       return 'An internal server error occurred.';
   }
@@ -153,10 +173,22 @@ export function errorHandler(error: unknown, req: Request, res: Response<{
   }
 
   if (error instanceof postgres.PostgresError) {
-    code = 'INTERNAL_ERROR';
-    message = 'The DB crashed maybe because they dont like you :p';
+    // Handle specific PostgreSQL errors
+    if (error.code === '23505') { // unique violation
+      code = 'DUPLICATE_ENTRY';
+      message = 'This record already exists';
+      details = { field: error.detail };
+    }
+    else {
+      code = 'DATABASE_ERROR';
+      message = 'A database error occurred';
+      details = {
+        code: error.code,
+        message: error.message,
+        detail: error.detail,
+      };
+    }
     statusCode = getStatusFromErrorCode(code);
-    details = error;
   }
 
   if (error instanceof ZodError) {
@@ -166,10 +198,24 @@ export function errorHandler(error: unknown, req: Request, res: Response<{
     statusCode = getStatusFromErrorCode(code);
   }
 
+  // Handle connection errors
+  if ((error as { code: string }).code === 'ETIMEDOUT') {
+    code = 'CONNECTION_TIMEOUT';
+    message = getMessageFromErrorCode(code);
+    details = {
+      timeout: (error as { timeout?: number }).timeout,
+    };
+    statusCode = getStatusFromErrorCode(code);
+  }
+
   if ((error as { code: string }).code === 'ECONNREFUSED') {
-    code = 'INTERNAL_ERROR';
-    message = 'The DB crashed maybe because they dont like you :p';
-    details = error;
+    code = 'CONNECTION_REFUSED';
+    message = getMessageFromErrorCode(code);
+    details = {
+      host: (error as { address?: string }).address,
+      port: (error as { port?: number }).port,
+    };
+    statusCode = getStatusFromErrorCode(code);
   }
 
   code = code ?? 'INTERNAL_ERROR';

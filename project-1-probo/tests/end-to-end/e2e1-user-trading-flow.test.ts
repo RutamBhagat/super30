@@ -16,7 +16,7 @@ describe('e-to-E-1', () => {
   it('should check the response messages and status', async () => {
     // Step 1: Create a new user "user5"
     let response = await supertest(app)
-      .post('/api/user/create')
+      .post('/api/user/create') 
       .send({
         username: 'user5',
         password: '123456',
@@ -35,11 +35,11 @@ describe('e-to-E-1', () => {
       .expect(200);
     expect(response.body.message).toBe(`Onramped ${userId} with amount 50000`);
 
-    // // Step 3: Create a new symbol
-    // response = await supertest(app)
-    //   .post('/api/symbol/create/AAPL_USD_25_Oct_2024_14_00')
-    //   .expect(201);
-    // expect(response.body.message).toBe('Symbol AAPL_USD_25_Oct_2024_14_00 created');
+    // Step 3: Create a new symbol
+    response = await supertest(app)
+      .post('/api/symbol/create/AAPL_USD_25_Oct_2024_14_00')
+      .expect(201);
+    expect(response.body.message).toBe('Symbol AAPL_USD_25_Oct_2024_14_00 created');
 
     // // Step 4: Mint tokens for User5
     // response = await supertest(app)
