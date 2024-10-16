@@ -2,6 +2,9 @@ import { type InferSelectModel, relations } from 'drizzle-orm';
 import { boolean, pgEnum, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
+import { onramps } from './onramp';
+import { orders } from './order';
+import { trades } from './trade';
 
 export const Gender = pgEnum('gender', ['MALE', 'FEMALE']);
 
@@ -18,6 +21,12 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  onramps: many(onramps),
+  trades: many(trades),
+  orders: many(orders),
+}));
 
 export const selectUserSchema = createSelectSchema(users, {
   email: schema =>

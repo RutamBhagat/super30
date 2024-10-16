@@ -7,6 +7,23 @@ import generateToken from '@/utils/jwt';
 import argon2 from 'argon2';
 import consola from 'consola';
 
+export const handleUserLogin = createHandler(loginSchema, async (req, res) => {
+  const { email, password } = req.body;
+  const user = await getUserByEmail(email);
+
+  if (!user)
+    throw new BackendError('USER_NOT_FOUND');
+
+  const matchPassword = await argon2.verify(user.password, password, {
+    salt: Buffer.from(user.salt, 'hex'),
+  });
+  if (!matchPassword)
+    throw new BackendError('INVALID_PASSWORD');
+
+  const token = generateToken(user.id);
+  res.status(200).json({ token });
+});
+
 export const handleAddUser = createHandler(newUserSchema, async (req, res) => {
   const user = req.body;
   consola.log('Received body:', req.body);
@@ -39,23 +56,6 @@ export const handleAddUser = createHandler(newUserSchema, async (req, res) => {
   res.status(201).json(addedUser);
 });
 
-export const handleUserLogin = createHandler(loginSchema, async (req, res) => {
-  const { email, password } = req.body;
-  const user = await getUserByEmail(email);
-
-  if (!user)
-    throw new BackendError('USER_NOT_FOUND');
-
-  const matchPassword = await argon2.verify(user.password, password, {
-    salt: Buffer.from(user.salt, 'hex'),
-  });
-  if (!matchPassword)
-    throw new BackendError('INVALID_PASSWORD');
-
-  const token = generateToken(user.id);
-  res.status(200).json({ token });
-});
-
 export const handleUserLoginWithoutVerification = createHandler(loginSchema, async (req, res) => {
   const { email } = req.body;
   const user = await getUserByEmail(email);
@@ -76,8 +76,6 @@ export const handleGetUser = createHandler(async (_req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      gender: user.gender,
-      jobTitle: user.jobTitle,
       isAdmin: user.isAdmin,
       isVerified: user.isVerified,
       createdAt: user.createdAt,
@@ -89,9 +87,9 @@ export const handleGetUser = createHandler(async (_req, res) => {
 export const handleUpdateUser = createHandler(updateUserSchema, async (req, res) => {
   const { user } = res.locals as { user: User };
 
-  const { firstName, lastName, email, gender, jobTitle, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
-  const updatedUser = await updateUser(user, { firstName, lastName, email, gender, jobTitle, password });
+  const updatedUser = await updateUser(user, { firstName, lastName, email, password });
 
   res.status(200).json({
     user: updatedUser,
