@@ -1,11 +1,12 @@
 import crypto from 'node:crypto';
 import process from 'node:process';
 import { type NewUser, type UpdateUser, type User, users } from '@/schema/user';
+import { createUserBalance } from '@/services/user-balance-services';
 import { db } from '@/utils/db';
 import { BackendError } from '@/utils/errors';
 import { sha256 } from '@/utils/hash';
 import argon2 from 'argon2';
-import { eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm'; // Import the createUserBalance function
 
 export async function getUserByUsername(username: string) {
   const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
@@ -49,6 +50,9 @@ export async function addUser(user: NewUser) {
       message: 'Failed to add user',
     });
   }
+
+  // Create a user balance record
+  await createUserBalance(newUser.id);
 
   return { user: newUser, code };
 }

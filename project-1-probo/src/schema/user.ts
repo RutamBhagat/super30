@@ -58,4 +58,5 @@ export const deleteUserSchema = z.object({
 // Types
 export type User = z.infer<typeof selectUserSchema>;
 export type NewUser = z.infer<typeof createUserSchema>['body'];
+export type UpdateUser = z.infer<typeof updateUserSchema>['body'];
 export type LoginCredentials = z.infer<typeof loginSchema>['body'];
