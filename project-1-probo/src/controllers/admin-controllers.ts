@@ -23,7 +23,7 @@ export const handleGetAUser = createHandler(
 );
 
 export const handleDeleteUserAdmin = createHandler(deleteUserSchema, async (req, res) => {
-  const { email } = req.body;
+  const { username } = req.body;
 
   const { user } = res.locals as { user: User };
 
@@ -33,7 +33,7 @@ export const handleDeleteUserAdmin = createHandler(deleteUserSchema, async (req,
     });
   }
 
-  const deletedUser = await deleteUser(email);
+  const deletedUser = await deleteUser(username);
 
   res.status(200).json({
     user: deletedUser,
