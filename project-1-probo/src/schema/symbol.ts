@@ -1,23 +1,17 @@
 import { type InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { trades } from './trade';
 
+// Symbols Table
 export const symbols = pgTable('symbols', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull().unique(),
+  name: text('name').primaryKey(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const symbolsRelations = relations(symbols, ({ many }) => ({
-  trades: many(trades),
-}));
-
-export const selectSymbolSchema = createSelectSchema(symbols, {
-  name: schema => schema.name.min(1),
-});
+// Zod Schemas
+export const selectSymbolSchema = createSelectSchema(symbols);
 
 export const createSymbolSchema = z.object({
   body: selectSymbolSchema.pick({
@@ -25,5 +19,6 @@ export const createSymbolSchema = z.object({
   }),
 });
 
+// Types
 export type Symbol = InferSelectModel<typeof symbols>;
 export type NewSymbol = z.infer<typeof createSymbolSchema>['body'];
