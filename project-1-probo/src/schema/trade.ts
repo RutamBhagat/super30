@@ -8,7 +8,7 @@ import { users } from './user';
 // Trades Table
 export const trades = pgTable('trades', {
   id: serial('id').primaryKey(),
-  buyerId: uuid('buyer_id').notNull().references(() => users.id),
+  userId: uuid('buyer_id').notNull().references(() => users.id),
   sellerId: uuid('seller_id').notNull().references(() => users.id),
   stockSymbol: text('stock_symbol').notNull().references(() => symbols.name),
   quantity: integer('quantity').notNull(),
@@ -20,7 +20,7 @@ export const trades = pgTable('trades', {
 // Relations
 export const tradesRelations = relations(trades, ({ one }) => ({
   buyer: one(users, {
-    fields: [trades.buyerId],
+    fields: [trades.userId],
     references: [users.id],
   }),
   seller: one(users, {
@@ -40,12 +40,10 @@ export const selectTradeSchema = createSelectSchema(trades).extend({
 
 export const createTradeSchema = z.object({
   body: selectTradeSchema.pick({
-    buyerId: true,
-    sellerId: true,
+    userId: true,
     stockSymbol: true,
     quantity: true,
     price: true,
-    stockType: true,
   }),
 });
 

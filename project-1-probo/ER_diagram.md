@@ -48,7 +48,7 @@ erDiagram
     }
     TRADES {
         serial id PK
-        uuid buyerId FK "references USERS(id)"
+        uuid userId FK "references USERS(id)"
         uuid sellerId FK "references USERS(id)"
         text stockSymbol FK "references SYMBOLS(name)"
         integer quantity
