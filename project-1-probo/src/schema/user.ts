@@ -1,4 +1,3 @@
-import { type InferSelectModel, relations } from 'drizzle-orm';
 import { boolean, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -9,7 +8,7 @@ export const users = pgTable('users', {
   username: varchar('username', { length: 255 }).unique().notNull(),
   email: text('email').unique(),
   isAdmin: boolean('is_admin').default(false),
-  password: text('password').notNull(),
+  password: text('password').notNull().default('123456'),
   isVerified: boolean('is_verified').notNull().default(true),
   salt: text('salt').notNull(),
   code: text('code').notNull(),
@@ -36,10 +35,23 @@ export const createUserSchema = z.object({
   }),
 });
 
+export const updateUserSchema = z.object({
+  body: selectUserSchema.pick({
+    username: true,
+    password: true,
+  }),
+});
+
 export const loginSchema = z.object({
   body: selectUserSchema.pick({
     username: true,
     password: true,
+  }),
+});
+
+export const deleteUserSchema = z.object({
+  body: selectUserSchema.pick({
+    username: true,
   }),
 });
 

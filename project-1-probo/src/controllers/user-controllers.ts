@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { deleteUserSchema, loginSchema, newUserSchema, updateUserSchema, type User, verifyUserSchema } from '@/schema/user';
+import { createUserSchema, deleteUserSchema, loginSchema, updateUserSchema, type User } from '@/schema/user';
 import { addUser, deleteUser, getUserByUsername, updateUser } from '@/services/user-services';
 import { createHandler } from '@/utils/create';
 import { BackendError } from '@/utils/errors';
@@ -24,7 +24,7 @@ export const handleUserLogin = createHandler(loginSchema, async (req, res) => {
   res.status(200).json({ token });
 });
 
-export const handleAddUser = createHandler(newUserSchema, async (req, res) => {
+export const handleAddUser = createHandler(createUserSchema, async (req, res) => {
   const user = req.body;
   const existingUser = await getUserByUsername(user.username);
 
